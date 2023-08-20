@@ -2,7 +2,7 @@ const { DataTypes } = require('sequelize');
 const { sequelize } = require('../services/mysqlHandler');
 
 const Trainers = sequelize.define(
-  'Trainers',
+  'trainers',
   {
     email: {
       type: DataTypes.STRING,

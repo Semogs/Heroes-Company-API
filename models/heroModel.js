@@ -2,7 +2,7 @@ const { DataTypes, Sequelize } = require('sequelize');
 const { sequelize } = require('../services/mysqlHandler');
 
 const Heroes = sequelize.define(
-  'Heroes',
+  'heroes',
   {
     name: {
       type: DataTypes.STRING,
@@ -43,7 +43,7 @@ const Heroes = sequelize.define(
     },
     last_trained_date: {
       type: DataTypes.DATE,
-      allowNull: true
+      allowNull: false
     }
   },
   {
