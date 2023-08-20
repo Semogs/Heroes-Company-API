@@ -5,9 +5,11 @@ const bodyParser = require('body-parser');
 const app = express();
 const serverPort = process.env.PORT || 9733;
 
-app.use(function (req, res, next) {
-  res.setHeader('Access-Control-Allow-Origin', '*');
-  res.setHeader('Access-Control-Allow-Methods', '*');
+app.use((req, res, next) => {
+  res.setHeader('Access-Control-Allow-Origin', 'https://semogs.github.io');
+  res.setHeader('Access-Control-Allow-Methods', 'GET, POST, OPTIONS, PUT, PATCH, DELETE');
+  res.setHeader('Access-Control-Allow-Headers', 'X-Requested-With,content-type');
+  res.setHeader('Access-Control-Allow-Credentials', true);
 
   next();
 });
