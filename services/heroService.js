@@ -14,13 +14,41 @@ const trainHero = async (heroGuid, trainerId) => {
     return { success: false, message: 'Hero not found' };
   }
 
-  const res = await updateHeroTrainingInfo(hero);
+  const res = await updateHeroTraining(hero, trainerId);
 
-  if (res) return res;
+  return res;
+};
 
+const updateHeroTraining = async (hero, trainerId) => {
+  const currentDate = new Date();
+  const lastTrainedDate = new Date(hero.dataValues.last_trained_date);
+
+  if (!isSameDay(lastTrainedDate, currentDate)) {
+    await resetDailyTrainingCount(hero, currentDate);
+  }
+
+  if (hero.dataValues.daily_training_count < 5) {
+    return await trainHeroOnce(hero, trainerId);
+  } else {
+    return { success: false, error: 'Hero has already trained 5 times today' };
+  }
+};
+
+const resetDailyTrainingCount = async (hero, currentDate) => {
+  await hero.update({
+    daily_training_count: 0,
+    last_trained_date: currentDate
+  });
+};
+
+const trainHeroOnce = async (hero, trainerId) => {
   const newPower = calculateNewPower(hero.dataValues.current_power);
-  await hero.update({ current_power: newPower, train_count: hero.dataValues.trainCount + 1, trainer_id: trainerId });
-
+  await hero.update({
+    current_power: newPower,
+    train_count: hero.dataValues.train_count + 1,
+    daily_training_count: hero.dataValues.daily_training_count + 1,
+    trainer_id: trainerId
+  });
   return { newPower, success: true };
 };
 
@@ -28,28 +56,6 @@ function calculateNewPower(currentPower) {
   const growthPercentage = Math.random() * 0.1;
   const newPower = currentPower * (1 + growthPercentage);
   return Math.round(newPower * 100) / 100;
-}
-
-async function updateHeroTrainingInfo(hero) {
-  const currentDate = new Date();
-  const lastTrainedDate = new Date(hero.dataValues.last_trained_date);
-
-  if (!hero.dataValues.training_start_date) {
-    await hero.update({ training_start_date: currentDate });
-  }
-
-  if (lastTrainedDate && isSameDay(currentDate, lastTrainedDate)) {
-    if (hero.dataValues.daily_training_count >= 5) {
-      return { success: false, error: 'Hero has already trained 5 times today' };
-    } else {
-      await hero.update({ daily_training_count: hero.dataValues.daily_training_count + 1 });
-    }
-  } else {
-    await hero.update({
-      daily_training_count: hero.dataValues.daily_training_count + 1,
-      last_trained_date: currentDate
-    });
-  }
 }
 
 function isSameDay(date1, date2) {
