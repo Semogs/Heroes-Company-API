@@ -1,14 +1,14 @@
-const Heroes = require('../models/heroModel');
+const { getAllHeroes, getHero, updateHero } = require('./mysqlHandler');
 
 const getAllHeroes = async () => {
-  const allHeroes = await Heroes.findAll();
+  const allHeroes = await getAllHeroes();
   if (!allHeroes || !allHeroes.length) return { success: false, message: 'No heroes found' };
 
   return { allHeroes, success: true };
 };
 
 const trainHero = async (heroGuid, trainerId) => {
-  const hero = await Heroes.findOne({ where: { guid: heroGuid } });
+  const hero = await getHero(heroGuid);
 
   if (!hero) {
     return { success: false, message: 'Hero not found' };
@@ -35,7 +35,7 @@ const updateHeroTraining = async (hero, trainerId) => {
 };
 
 const resetDailyTrainingCount = async (hero, currentDate) => {
-  await hero.update({
+  await updateHero(hero, {
     daily_training_count: 0,
     last_trained_date: currentDate
   });
@@ -43,7 +43,7 @@ const resetDailyTrainingCount = async (hero, currentDate) => {
 
 const trainHeroOnce = async (hero, trainerId) => {
   const newPower = calculateNewPower(hero.dataValues.current_power);
-  await hero.update({
+  await updateHero(hero, {
     current_power: newPower,
     train_count: hero.dataValues.train_count + 1,
     daily_training_count: hero.dataValues.daily_training_count + 1,
